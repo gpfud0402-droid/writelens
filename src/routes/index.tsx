@@ -57,7 +57,7 @@ function Index() {
             </div>
             <h1 className="text-xl font-bold tracking-tight">WriteLens</h1>
           </div>
-          <AuthButtons />
+          <AuthButtons onSessionChange={(s) => setUser(s?.user ?? null)} />
         </div>
       </header>
 
@@ -79,7 +79,7 @@ function Index() {
               receive rubric-based feedback from Gemini.
             </p>
             <div className="mt-8">
-              <AuthButtons />
+              <AuthButtons onSessionChange={(s) => setUser(s?.user ?? null)} />
             </div>
           </div>
         )}
