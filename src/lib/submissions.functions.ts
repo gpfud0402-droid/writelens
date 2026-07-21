@@ -23,7 +23,7 @@ const CreateSubmissionInput = z.object({
 
 export const createSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => CreateSubmissionInput.parse(input))
+  .validator((input: unknown) => CreateSubmissionInput.parse(input))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("submissions")
@@ -47,7 +47,7 @@ const UpdateSubmissionTextInput = z.object({
 
 export const updateSubmissionText = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => UpdateSubmissionTextInput.parse(input))
+  .validator((input: unknown) => UpdateSubmissionTextInput.parse(input))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("submissions")
@@ -105,7 +105,7 @@ const SaveFeedbackInput = z.object({
 
 export const saveFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => SaveFeedbackInput.parse(input))
+  .validator((input: unknown) => SaveFeedbackInput.parse(input))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("feedbacks")
@@ -139,7 +139,7 @@ const SaveRewriteInput = z.object({
 
 export const saveRewrite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => SaveRewriteInput.parse(input))
+  .validator((input: unknown) => SaveRewriteInput.parse(input))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("rewrites")

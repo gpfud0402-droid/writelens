@@ -33,7 +33,7 @@ const RunOcrInput = z.object({
 });
 
 export const runOcr = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => RunOcrInput.parse(input))
+  .validator((input: unknown) => RunOcrInput.parse(input))
   .handler(async ({ data }) => {
     const start = performance.now();
 
@@ -102,7 +102,7 @@ const CompareOcrInput = z.object({
 });
 
 export const compareOcr = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => CompareOcrInput.parse(input))
+  .validator((input: unknown) => CompareOcrInput.parse(input))
   .handler(async ({ data }) => {
     const [cloud, npu] = await Promise.all([
       runOcr({ data: { imageBase64: data.imageBase64, mode: "cloud" } }),

@@ -56,7 +56,7 @@ TOEFL Academic Discussion Writing Rubric (0-5 per category):
 `;
 
 export const evaluateAnswer = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => EvaluateInput.parse(input))
+  .validator((input: unknown) => EvaluateInput.parse(input))
   .handler(async ({ data }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) {
@@ -110,7 +110,7 @@ const RewriteInput = z.object({
 });
 
 export const evaluateRewrite = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => RewriteInput.parse(input))
+  .validator((input: unknown) => RewriteInput.parse(input))
   .handler(async ({ data }) => {
     const feedback = await evaluateAnswer({
       data: {
