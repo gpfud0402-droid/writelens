@@ -29,18 +29,21 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [session, setSession] = useState<
-    Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] | null
-  >(null);
+  const [user, setUser] = useState<ReturnType<typeof supabase.auth.getUser> extends Promise<infer R> ? R extends { data: infer D } ? D["user"] : null : null | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  const { data: user, isLoading: authLoading } = useQuery({
-    queryKey: ["auth"],
-    queryFn: async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      return data.session?.user ?? null;
-    },
-  });
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      setUser(newSession?.user ?? null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
