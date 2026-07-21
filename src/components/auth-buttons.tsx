@@ -6,7 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
-export function AuthButtons() {
+export function AuthButtons({
+  onSessionChange,
+}: {
+  onSessionChange?: (
+    session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] | null
+  ) => void;
+}) {
   const [session, setSession] = useState<
     Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] | null
   >(null);
@@ -20,13 +26,14 @@ export function AuthButtons() {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
+      onSessionChange?.(data.session);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("[AuthButtons] auth event", _event, session?.user?.email ?? null);
       setSession(session);
+      onSessionChange?.(session);
     });
 
     return () => subscription.unsubscribe();
