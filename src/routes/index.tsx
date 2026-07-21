@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import { AuthButtons } from "@/components/auth-buttons";
 import { TaskSelector, TaskType, TASK_PROMPTS } from "@/components/task-selector";
 import { ImageUploader } from "@/components/image-uploader";
