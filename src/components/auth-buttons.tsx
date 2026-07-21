@@ -25,6 +25,7 @@ export function AuthButtons() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("[AuthButtons] auth event", _event, session?.user?.email ?? null);
       setSession(session);
     });
 
