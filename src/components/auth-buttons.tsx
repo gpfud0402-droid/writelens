@@ -89,16 +89,20 @@ export function AuthButtons() {
           disabled={signingIn || !email || !password}
           onClick={async () => {
             setSigningIn(true);
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signInWithPassword({
               email,
               password,
             });
-            if (error) {
-              const { error: signUpError } = await supabase.auth.signUp({
+            if (data.session) {
+              setSession(data.session);
+            } else if (error) {
+              const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
               });
-              if (signUpError) {
+              if (signUpData.session) {
+                setSession(signUpData.session);
+              } else if (signUpError) {
                 setSigningIn(false);
                 alert("Auth failed: " + signUpError.message);
               }
