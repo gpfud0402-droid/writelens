@@ -34,11 +34,13 @@ function Index() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
+      console.log("[Index] initial session", data.session?.user?.email ?? null);
       setUser(data.session?.user ?? null);
       setAuthLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log("[Index] auth event", event, newSession?.user?.email ?? null);
       setUser(newSession?.user ?? null);
     });
 
