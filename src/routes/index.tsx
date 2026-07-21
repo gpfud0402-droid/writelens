@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [user, setUser] = useState<ReturnType<typeof supabase.auth.getUser> extends Promise<infer R> ? R extends { data: infer D } ? D["user"] : null : null | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
