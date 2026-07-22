@@ -19,17 +19,20 @@ const CorrectionSchema = z.object({
   explanation: z.string(),
 });
 
-// Accept both {question, hint, focus} and Gemini's frequent {prompt, hint, focus}
-// or {question, hint, area} variants. Normalized downstream to {question, hint, focus}.
-const RewriteQuestionSchema = z
-  .object({
-    question: z.string().optional(),
-    prompt: z.string().optional(),
-    hint: z.string().optional(),
-    focus: z.string().optional(),
-    area: z.string().optional(),
-  })
-  .passthrough();
+// Frontend consumes {question, hint, focus}. Gemini sometimes emits {prompt, hint}
+// or {area} instead — we accept the loose shape at LLM boundary and normalize.
+const RewriteQuestionSchema = z.object({
+  question: z.string(),
+  hint: z.string(),
+  focus: z.string(),
+});
+const RewriteQuestionLooseSchema = z.object({
+  question: z.string().optional(),
+  prompt: z.string().optional(),
+  hint: z.string().optional(),
+  focus: z.string().optional(),
+  area: z.string().optional(),
+});
 
 export const FeedbackSchema = z.object({
   scores: ScoreSchema,
