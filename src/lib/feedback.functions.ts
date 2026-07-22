@@ -147,7 +147,7 @@ Return a JSON object with:
             reasons: z.string(),
             corrections: z.array(CorrectionSchema),
             weaknesses: z.array(z.string()),
-            rewrite_questions: z.array(RewriteQuestionSchema),
+            rewrite_questions: z.array(RewriteQuestionLooseSchema),
           }),
         }),
         prompt,
