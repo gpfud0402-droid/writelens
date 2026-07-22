@@ -137,6 +137,7 @@ function WriteLensApp() {
   const handleEvaluate = async () => {
     if (!correctedText.trim()) return;
     setFeedbackLoading(true);
+    setEvalDebug(null);
     try {
       const submission = await createSubmissionFn({
         data: {
@@ -156,7 +157,19 @@ function WriteLensApp() {
       setActiveTab("feedback");
     } catch (error) {
       console.error(error);
-      alert("Evaluation failed: " + (error instanceof Error ? error.message : String(error)));
+      const raw = error instanceof Error ? error.message : String(error);
+      const marker = "EVALUATION_FAILED::";
+      const idx = raw.indexOf(marker);
+      if (idx >= 0) {
+        try {
+          const debug = JSON.parse(raw.slice(idx + marker.length));
+          setEvalDebug({ message: "Evaluation failed", debug });
+        } catch {
+          setEvalDebug({ message: raw });
+        }
+      } else {
+        setEvalDebug({ message: raw });
+      }
     } finally {
       setFeedbackLoading(false);
     }
