@@ -1,0 +1,16 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+openai==1.51.0
+chromadb==0.5.5
+sentence-transformers==3.1.1
+opencv-python-headless==4.10.0.84
+Pillow==10.4.0
+numpy==1.26.4
+onnxruntime==1.19.2
+transformers==4.44.2
+torch==2.4.1
+
+# Furiosa NPU 배포 환경에서만 설치 (개발 PC에는 보드가 없다면 생략 가능)
+# furiosa-sdk==0.10.*
+# furiosa-runtime==0.10.*
