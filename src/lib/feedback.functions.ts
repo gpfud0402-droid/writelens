@@ -63,7 +63,17 @@ function normalizeFeedback(raw: unknown): Feedback {
     reasons: typeof r.reasons === "string" ? r.reasons : "",
     corrections: Array.isArray(r.corrections) ? r.corrections : [],
     weaknesses: Array.isArray(r.weaknesses) ? r.weaknesses : [],
-    rewrite_questions: Array.isArray(r.rewrite_questions) ? r.rewrite_questions : [],
+    rewrite_questions: Array.isArray(r.rewrite_questions)
+      ? r.rewrite_questions.map((q) => {
+          const parsed = RewriteQuestionLooseSchema.safeParse(q);
+          const v = parsed.success ? parsed.data : ({} as z.infer<typeof RewriteQuestionLooseSchema>);
+          return {
+            question: v.question ?? v.prompt ?? "",
+            hint: v.hint ?? "",
+            focus: v.focus ?? v.area ?? "",
+          };
+        })
+      : [],
   });
 }
 
