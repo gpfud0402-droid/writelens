@@ -100,6 +100,7 @@ function WriteLensApp() {
   const [correctedText, setCorrectedText] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [evalDebug, setEvalDebug] = useState<{ message: string; debug?: unknown } | null>(null);
   const [activeTab, setActiveTab] = useState("upload");
 
   const runOcrFn = useServerFn(runOcr);
@@ -136,6 +137,7 @@ function WriteLensApp() {
   const handleEvaluate = async () => {
     if (!correctedText.trim()) return;
     setFeedbackLoading(true);
+    setEvalDebug(null);
     try {
       const submission = await createSubmissionFn({
         data: {
@@ -155,7 +157,19 @@ function WriteLensApp() {
       setActiveTab("feedback");
     } catch (error) {
       console.error(error);
-      alert("Evaluation failed: " + (error instanceof Error ? error.message : String(error)));
+      const raw = error instanceof Error ? error.message : String(error);
+      const marker = "EVALUATION_FAILED::";
+      const idx = raw.indexOf(marker);
+      if (idx >= 0) {
+        try {
+          const debug = JSON.parse(raw.slice(idx + marker.length));
+          setEvalDebug({ message: "Evaluation failed", debug });
+        } catch {
+          setEvalDebug({ message: raw });
+        }
+      } else {
+        setEvalDebug({ message: raw });
+      }
     } finally {
       setFeedbackLoading(false);
     }
@@ -313,7 +327,9 @@ function WriteLensApp() {
               loading={feedbackLoading}
             />
           )}
+          {evalDebug && <EvalDebugPanel data={evalDebug} onDismiss={() => setEvalDebug(null)} />}
         </TabsContent>
+
 
         <TabsContent value="feedback" className="space-y-6">
           {feedback && (
@@ -366,6 +382,85 @@ function ResultCard({
           </p>
         </>
       )}
+    </div>
+  );
+}
+
+function EvalDebugPanel({
+  data,
+  onDismiss,
+}: {
+  data: { message: string; debug?: unknown };
+  onDismiss: () => void;
+}) {
+  const d = (data.debug ?? {}) as Record<string, unknown>;
+  const rawText = typeof d.rawText === "string" ? (d.rawText as string) : undefined;
+  const parsedRecovered = d.parsedRecovered;
+  return (
+    <Card className="border-destructive">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-destructive text-lg">Evaluation failed (debug)</CardTitle>
+        <Button variant="ghost" size="sm" onClick={onDismiss}>
+          Dismiss
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <p className="font-medium">{data.message}</p>
+        {data.debug != null && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            <DebugField label="kind" value={String(d.kind ?? "-")} />
+            <DebugField label="finishReason" value={String(d.finishReason ?? "-")} />
+            <DebugField label="essayLength" value={String(d.essayLength ?? "-")} />
+            <DebugField
+              label="promptIncludesEssay"
+              value={String(d.promptIncludesEssay ?? "-")}
+            />
+            <DebugField label="taskType" value={String(d.taskType ?? "-")} />
+            {d.parseError != null && (
+              <DebugField label="parseError" value={String(d.parseError)} />
+            )}
+            {d.cause != null && d.cause !== "" && (
+              <DebugField label="cause" value={String(d.cause)} />
+            )}
+            {d.message != null && <DebugField label="message" value={String(d.message)} />}
+          </div>
+        )}
+        {typeof d.essayPreview === "string" && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">essayPreview</p>
+            <pre className="mt-1 max-h-40 overflow-auto rounded-md bg-muted p-2 text-xs whitespace-pre-wrap">
+              {d.essayPreview as string}
+            </pre>
+          </div>
+        )}
+        {rawText && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">
+              rawText (model response)
+            </p>
+            <pre className="mt-1 max-h-64 overflow-auto rounded-md bg-muted p-2 text-xs whitespace-pre-wrap">
+              {rawText}
+            </pre>
+          </div>
+        )}
+        {parsedRecovered !== undefined && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">parsedRecovered</p>
+            <pre className="mt-1 max-h-64 overflow-auto rounded-md bg-muted p-2 text-xs">
+              {JSON.stringify(parsedRecovered, null, 2)}
+            </pre>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function DebugField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border p-2">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-sm break-all">{value}</p>
     </div>
   );
 }

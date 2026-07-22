@@ -112,10 +112,12 @@ Return a JSON object with:
 - rewrite_questions: an array of 1-2 targeted rewrite exercises with Korean hints
 `;
 
+    const essayPreview = data.text.slice(0, 300);
+    const promptIncludesEssay = prompt.includes(data.text);
     console.log("[evaluateAnswer] taskType:", data.taskType);
     console.log("[evaluateAnswer] essay length:", data.text.length);
-    console.log("[evaluateAnswer] essay preview:", data.text.slice(0, 200));
-    console.log("[evaluateAnswer] prompt contains essay:", prompt.includes(data.text));
+    console.log("[evaluateAnswer] essay preview:", essayPreview);
+    console.log("[evaluateAnswer] prompt contains essay:", promptIncludesEssay);
 
     try {
       const { output } = await generateText({
@@ -134,12 +136,19 @@ Return a JSON object with:
 
       return normalizeFeedback(output);
     } catch (error) {
+      const debug: Record<string, unknown> = {
+        essayLength: data.text.length,
+        essayPreview,
+        promptIncludesEssay,
+        taskType: data.taskType,
+      };
       if (NoObjectGeneratedError.isInstance(error)) {
-        console.error("[evaluateAnswer] NoObjectGeneratedError");
-        console.error("[evaluateAnswer] raw text:", error.text);
-        console.error("[evaluateAnswer] cause:", error.cause);
-        console.error("[evaluateAnswer] finishReason:", error.finishReason);
-        // Try to salvage: parse raw text as JSON and normalize
+        debug.kind = "NoObjectGeneratedError";
+        debug.finishReason = error.finishReason;
+        debug.rawText = error.text;
+        debug.cause =
+          error.cause instanceof Error ? error.cause.message : String(error.cause ?? "");
+        console.error("[evaluateAnswer] NoObjectGeneratedError", debug);
         if (error.text) {
           try {
             const cleaned = error.text
@@ -147,16 +156,21 @@ Return a JSON object with:
               .replace(/\s*```\s*$/i, "")
               .trim();
             const parsed = JSON.parse(cleaned);
+            debug.parsedRecovered = parsed;
             console.log("[evaluateAnswer] recovered from raw text");
             return normalizeFeedback(parsed);
           } catch (parseErr) {
+            debug.parseError =
+              parseErr instanceof Error ? parseErr.message : String(parseErr);
             console.error("[evaluateAnswer] failed to parse raw text:", parseErr);
           }
         }
       } else {
+        debug.kind = "UnknownError";
+        debug.message = error instanceof Error ? error.message : String(error);
         console.error("[evaluateAnswer] unexpected error:", error);
       }
-      throw error;
+      throw new Error(`EVALUATION_FAILED::${JSON.stringify(debug)}`);
     }
   });
 
