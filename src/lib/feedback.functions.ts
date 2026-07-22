@@ -19,10 +19,19 @@ const CorrectionSchema = z.object({
   explanation: z.string(),
 });
 
+// Frontend consumes {question, hint, focus}. Gemini sometimes emits {prompt, hint}
+// or {area} instead — we accept the loose shape at LLM boundary and normalize.
 const RewriteQuestionSchema = z.object({
   question: z.string(),
   hint: z.string(),
   focus: z.string(),
+});
+const RewriteQuestionLooseSchema = z.object({
+  question: z.string().optional(),
+  prompt: z.string().optional(),
+  hint: z.string().optional(),
+  focus: z.string().optional(),
+  area: z.string().optional(),
 });
 
 export const FeedbackSchema = z.object({
@@ -54,7 +63,17 @@ function normalizeFeedback(raw: unknown): Feedback {
     reasons: typeof r.reasons === "string" ? r.reasons : "",
     corrections: Array.isArray(r.corrections) ? r.corrections : [],
     weaknesses: Array.isArray(r.weaknesses) ? r.weaknesses : [],
-    rewrite_questions: Array.isArray(r.rewrite_questions) ? r.rewrite_questions : [],
+    rewrite_questions: Array.isArray(r.rewrite_questions)
+      ? r.rewrite_questions.map((q) => {
+          const parsed = RewriteQuestionLooseSchema.safeParse(q);
+          const v = parsed.success ? parsed.data : ({} as z.infer<typeof RewriteQuestionLooseSchema>);
+          return {
+            question: v.question ?? v.prompt ?? "",
+            hint: v.hint ?? "",
+            focus: v.focus ?? v.area ?? "",
+          };
+        })
+      : [],
   });
 }
 
@@ -109,7 +128,7 @@ Return a JSON object with:
 - reasons: a short Korean summary of the biggest strengths and weaknesses
 - corrections: an array of 2-5 specific English grammar/usage corrections with explanations in Korean
 - weaknesses: an array of 2-3 key improvement areas in Korean
-- rewrite_questions: an array of 1-2 targeted rewrite exercises with Korean hints
+- rewrite_questions: an array of 1-2 targeted rewrite exercises. Each item MUST use exactly these field names: {"question": string (the English rewrite instruction), "hint": string (a Korean hint), "focus": string (a short Korean label of the focus area)}. Do NOT use "prompt" or "area" — use "question" and "focus".
 `;
 
     const essayPreview = data.text.slice(0, 300);
@@ -128,7 +147,7 @@ Return a JSON object with:
             reasons: z.string(),
             corrections: z.array(CorrectionSchema),
             weaknesses: z.array(z.string()),
-            rewrite_questions: z.array(RewriteQuestionSchema),
+            rewrite_questions: z.array(RewriteQuestionLooseSchema),
           }),
         }),
         prompt,
