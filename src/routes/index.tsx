@@ -100,6 +100,7 @@ function WriteLensApp() {
   const [correctedText, setCorrectedText] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [evalDebug, setEvalDebug] = useState<{ message: string; debug?: unknown } | null>(null);
   const [activeTab, setActiveTab] = useState("upload");
 
   const runOcrFn = useServerFn(runOcr);
