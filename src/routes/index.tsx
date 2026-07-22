@@ -327,7 +327,9 @@ function WriteLensApp() {
               loading={feedbackLoading}
             />
           )}
+          {evalDebug && <EvalDebugPanel data={evalDebug} onDismiss={() => setEvalDebug(null)} />}
         </TabsContent>
+
 
         <TabsContent value="feedback" className="space-y-6">
           {feedback && (
