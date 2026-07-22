@@ -1,14 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { generateText, Output } from "ai";
+import { generateText, Output, NoObjectGeneratedError } from "ai";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
+// Lenient schemas: no min/max/length bounds — the model may drift slightly
+// and strict bounds cause post-hoc validation failures. We clamp in code.
 const ScoreSchema = z.object({
-  task_response: z.number().min(0).max(5),
-  coherence: z.number().min(0).max(5),
-  language: z.number().min(0).max(5),
-  vocabulary: z.number().min(0).max(5),
-  total_score: z.number().min(0).max(5),
+  task_response: z.number(),
+  coherence: z.number(),
+  language: z.number(),
+  vocabulary: z.number(),
+  total_score: z.number(),
 });
 
 const CorrectionSchema = z.object({
@@ -32,6 +34,29 @@ export const FeedbackSchema = z.object({
 });
 
 export type Feedback = z.infer<typeof FeedbackSchema>;
+
+function clamp(n: number, min = 0, max = 5) {
+  if (typeof n !== "number" || Number.isNaN(n)) return 0;
+  return Math.max(min, Math.min(max, n));
+}
+
+function normalizeFeedback(raw: unknown): Feedback {
+  const r = (raw ?? {}) as Record<string, unknown>;
+  const s = (r.scores ?? {}) as Record<string, unknown>;
+  return FeedbackSchema.parse({
+    scores: {
+      task_response: clamp(Number(s.task_response)),
+      coherence: clamp(Number(s.coherence)),
+      language: clamp(Number(s.language)),
+      vocabulary: clamp(Number(s.vocabulary)),
+      total_score: clamp(Number(s.total_score)),
+    },
+    reasons: typeof r.reasons === "string" ? r.reasons : "",
+    corrections: Array.isArray(r.corrections) ? r.corrections : [],
+    weaknesses: Array.isArray(r.weaknesses) ? r.weaknesses : [],
+    rewrite_questions: Array.isArray(r.rewrite_questions) ? r.rewrite_questions : [],
+  });
+}
 
 const EvaluateInput = z.object({
   text: z.string().min(1),
