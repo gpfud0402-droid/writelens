@@ -20,7 +20,7 @@ export function FeedbackPanel({ feedback }: FeedbackPanelProps) {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Total</span>
-            <span className="text-2xl font-bold">{scores.total_score} / 30</span>
+            <span className="text-2xl font-bold">{scores.total_score} / 20</span>
           </div>
           <ScoreRow label="Task response" score={scores.task_response} />
           <ScoreRow label="Coherence & cohesion" score={scores.coherence} />
@@ -117,9 +117,9 @@ function ScoreRow({ label, score }: { label: string; score: number }) {
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium">{score} / 7.5</span>
+        <span className="font-medium">{score} / 5</span>
       </div>
-      <Progress value={(score / 7.5) * 100} className="h-2" />
+      <Progress value={(score / 5) * 100} className="h-2" />
     </div>
   );
 }

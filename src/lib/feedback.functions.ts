@@ -52,14 +52,16 @@ function clamp(n: number, min = 0, max = 5) {
 function normalizeFeedback(raw: unknown): Feedback {
   const r = (raw ?? {}) as Record<string, unknown>;
   const s = (r.scores ?? {}) as Record<string, unknown>;
+  const task_response = clamp(Number(s.task_response));
+  const coherence = clamp(Number(s.coherence));
+  const language = clamp(Number(s.language));
+  const vocabulary = clamp(Number(s.vocabulary));
+  // Derive total from category scores (each 0-5, total 0-20) so UI always matches parts.
+  const total_score = Number(
+    (task_response + coherence + language + vocabulary).toFixed(1),
+  );
   return FeedbackSchema.parse({
-    scores: {
-      task_response: clamp(Number(s.task_response)),
-      coherence: clamp(Number(s.coherence)),
-      language: clamp(Number(s.language)),
-      vocabulary: clamp(Number(s.vocabulary)),
-      total_score: clamp(Number(s.total_score)),
-    },
+    scores: { task_response, coherence, language, vocabulary, total_score },
     reasons: typeof r.reasons === "string" ? r.reasons : "",
     corrections: Array.isArray(r.corrections) ? r.corrections : [],
     weaknesses: Array.isArray(r.weaknesses) ? r.weaknesses : [],

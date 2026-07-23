@@ -81,7 +81,7 @@ export function RewritePanel({
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Total</span>
               <span className="text-2xl font-bold">
-                {rewriteScore.total_score} / 30
+                {rewriteScore.total_score} / 20
               </span>
             </div>
             <ScoreRow label="Task response" score={rewriteScore.task_response} />
@@ -101,7 +101,7 @@ export function RewritePanel({
                   : "Needs more work"}
               </Badge>
               <span className="text-xs text-muted-foreground">
-                Previous: {feedback.scores.total_score} / 30
+                Previous: {feedback.scores.total_score} / 20
               </span>
             </div>
           </CardContent>
@@ -116,9 +116,9 @@ function ScoreRow({ label, score }: { label: string; score: number }) {
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium">{score} / 7.5</span>
+        <span className="font-medium">{score} / 5</span>
       </div>
-      <Progress value={(score / 7.5) * 100} className="h-2" />
+      <Progress value={(score / 5) * 100} className="h-2" />
     </div>
   );
 }
