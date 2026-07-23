@@ -101,7 +101,7 @@ export function RewritePanel({
                   : "Needs more work"}
               </Badge>
               <span className="text-xs text-muted-foreground">
-                Previous: {feedback.scores.total_score} / 30
+                Previous: {feedback.scores.total_score} / 20
               </span>
             </div>
           </CardContent>
