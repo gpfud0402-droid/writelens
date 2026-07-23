@@ -20,7 +20,7 @@ export function FeedbackPanel({ feedback }: FeedbackPanelProps) {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Total</span>
-            <span className="text-2xl font-bold">{scores.total_score} / 30</span>
+            <span className="text-2xl font-bold">{scores.total_score} / 20</span>
           </div>
           <ScoreRow label="Task response" score={scores.task_response} />
           <ScoreRow label="Coherence & cohesion" score={scores.coherence} />
