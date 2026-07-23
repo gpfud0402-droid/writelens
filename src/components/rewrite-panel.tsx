@@ -81,7 +81,7 @@ export function RewritePanel({
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Total</span>
               <span className="text-2xl font-bold">
-                {rewriteScore.total_score} / 30
+                {rewriteScore.total_score} / 20
               </span>
             </div>
             <ScoreRow label="Task response" score={rewriteScore.task_response} />
