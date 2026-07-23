@@ -117,9 +117,9 @@ function ScoreRow({ label, score }: { label: string; score: number }) {
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium">{score} / 7.5</span>
+        <span className="font-medium">{score} / 5</span>
       </div>
-      <Progress value={(score / 7.5) * 100} className="h-2" />
+      <Progress value={(score / 5) * 100} className="h-2" />
     </div>
   );
 }
